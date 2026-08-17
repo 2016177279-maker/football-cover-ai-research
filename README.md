@@ -2,6 +2,8 @@
 
 Football Cover AI Research is an independent, non-commercial, nonprofit academic research project studying visual characteristics and engagement patterns in publicly available football-related video content.
 
+> **This research project uses the YouTube Data API to retrieve publicly available video metadata and thumbnails for academic research.**
+
 > **Project policies:** [Privacy Policy](PRIVACY.md) · [Terms of Use](TERMS.md)
 
 ## Research Purpose
