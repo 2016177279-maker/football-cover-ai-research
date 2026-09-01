@@ -1,0 +1,27 @@
+keywords:
+  - 足球
+  - 梅西
+  - C罗
+  - 英超
+  - 欧冠
+
+collection:
+  platform: bilibili
+  max_items: 120
+  max_pages_per_keyword: 10
+  timeout_seconds: 10
+  request_interval_seconds: 1.0
+  max_retries: 2
+  fetch_author_followers: false
+  output_file: data/raw/bilibili_sample.csv
+
+round2:
+  per_keyword_limit: 40
+  max_pages_per_keyword: 10
+  recent_months: 12
+  collection_batch: round2
+  output_file: data/raw/bilibili_round2.csv
+  request_interval_seconds: 1.2
+  timeout_seconds: 10
+  max_retries: 1
+  stop_on_platform_risk: true

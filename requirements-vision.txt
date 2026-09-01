@@ -1,0 +1,4 @@
+# Optional dependencies for selected visual feature extraction utilities.
+# The offline Streamlit demo does not require these packages.
+-r requirements.txt
+opencv-python-headless>=4.10,<5

@@ -1,0 +1,182 @@
+version: 1
+status: schema_definition_only
+schema_version: advanced_cv_v1.1.0-minimal
+extractor_code_version: advanced_cv_v1.1.0
+
+# ---------------------------------------------------------------------------
+# Scope guards
+# ---------------------------------------------------------------------------
+scopes:
+  smoke128:
+    n_items_exact: 128
+    manifest: data/research/advanced_cv_v1/advanced_cv_v1_smoke_manifest_v1.csv
+    fail_if_n_mismatch: true
+  production:
+    n_items_exact: 5199
+    manifest: reports/final_v2_downstream_integrity_gate_v1/advanced_cv_execution_inventory_v1.csv
+    # Derived from the immutable 5,200 FINAL V2 membership and valid local
+    # thumbnails. The guarded executor still requires explicit confirmation.
+    fail_if_n_mismatch: true
+    unavailable_no_thumbnail_n: 1
+    executor: scripts/run_advanced_cv_final_v2_v1.py
+    explicit_confirmation_required: true
+
+# ---------------------------------------------------------------------------
+# Lineage
+# ---------------------------------------------------------------------------
+lineage_fields:
+  - video_id
+  - canonical_image_path
+  - canonical_image_sha256
+  - advanced_cv_schema_version
+  - extractor_code_version
+  - run_id
+  - extracted_at_utc
+  - device_type
+  - overall_extraction_status
+  - overall_failure_reason
+
+# ---------------------------------------------------------------------------
+# Image discovery
+# ---------------------------------------------------------------------------
+image_search_roots:
+  - data/research/thumbnails_frozen5000_v1/images
+  - data/images/youtube
+  - data/images/youtube_v3_blind
+  - data/images/youtube_v4_blind120
+  - data/images/youtube_v5_1_blind150
+  - data/images/youtube_v5_2_blind200
+
+# ---------------------------------------------------------------------------
+# Components
+# ---------------------------------------------------------------------------
+components:
+  clip:
+    name: clip_vit_base_patch32
+    type: representation
+    framework: transformers
+    weights: openai/clip-vit-base-patch32
+    output_dim: 512
+    dtype: float32
+    l2_normalize: true
+    embedding_artifact: parquet
+    core: true
+  aesthetic:
+    name: laion_aesthetics_predictor_v1_vit_b_32_linear
+    type: scoring
+    framework: torch
+    weights_source: LAION-AI/aesthetic-predictor
+    revision: 6d122adad522ab246644d9dc1c6d7a3810ee255f
+    input: normalized_clip_vit_b_32_embedding_512d
+    method_label: CLIP-based aesthetic proxy
+    training_dataset: not_disclosed_by_upstream
+    outputs:
+      - aesthetic_score
+  saliency:
+    name: opencv_static_saliency_spectral_residual
+    type: geometry
+    framework: opencv
+    outputs:
+      - saliency_concentration_top10
+      - saliency_center_share
+      - saliency_peak_region_share
+      - saliency_subject_share
+      - saliency_background_share
+  text:
+    name: ppocr_v5_detection
+    type: detection
+    framework: paddleocr
+    weights_source: PaddlePaddle/PaddleOCR/ppocr_v5/detection
+    weights_sha256: e87295bb89a547042604b1f07d1ed823502e20c8c11bcdb6b74cf521b6d8bfac
+    storage_text: false
+    outputs:
+      - text_region_count
+      - text_area_ratio
+      - text_largest_region_area_ratio
+      - text_subject_overlap_ratio
+  face:
+    name: yunet_2023mar
+    type: detection
+    framework: opencv_zoo
+    weights_source: opencv_zoo/face_detection_yunet_2023mar
+    weights_sha256: 8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4
+    thresholds:
+      score_threshold: 0.5
+      nms_threshold: 0.3
+      top_k: 100
+    outputs:
+      - face_count
+      - face_area_ratio
+      - largest_face_area_ratio
+  object:
+    name: yolo11n_coco
+    type: detection
+    framework: ultralytics
+    weights: yolo11n.pt
+    thresholds:
+      confidence: 0.25
+      nms_iou: 0.45
+    person_class_id: 0
+    subject_class_ids: [0, 32]
+    outputs:
+      - person_count
+      - person_area_ratio
+      - largest_person_area_ratio
+      - subject_count
+      - subject_area_ratio
+      - largest_subject_area_ratio
+
+# ---------------------------------------------------------------------------
+# Geometry contract
+# ---------------------------------------------------------------------------
+geometry:
+  union_area_for_overlap: true
+  subject_region_definition: union_of_yolo_person_and_sports_ball_boxes
+
+# Retained code only. It is not part of smoke readiness and is not required by
+# the Master Dataset.
+optional_robustness:
+  resnet50:
+    module: src.advanced_cv_v1.backbone_resnet50
+    core: false
+
+excluded_from_core:
+  nima_mobilenet:
+    module: src.advanced_cv_v1.aesthetic_mobilenima
+    reason: checkpoint_backbone_mismatch_and_failed_parameter_load_audit
+  visual_semantic_v1_2:
+    reason: failed_DEV80_and_permanently_excluded
+
+# ---------------------------------------------------------------------------
+# Smoke stratification
+# ---------------------------------------------------------------------------
+smoke:
+  n_items: 128
+  seed: 20260826
+  stratifier_fields:
+    - brightness_mean
+    - entropy
+    - edge_density
+    - aspect_ratio
+  bins_per_stratifier: 4
+  selection: round_robin_within_bins
+  prohibited_signals:
+    - propagation_outcomes
+    - engagement
+    - human_gt
+    - semantic_labels
+
+# ---------------------------------------------------------------------------
+# Cache / resume
+# ---------------------------------------------------------------------------
+cache:
+  key_components:
+    - model_revision
+    - preprocessing_version
+    - image_sha256
+  resume_key:
+    - video_id
+    - image_sha256
+    - component_version
+  atomic_writes: true
+  manifest: append_only_jsonl

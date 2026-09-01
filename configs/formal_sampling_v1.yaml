@@ -1,0 +1,248 @@
+protocol_version: formal_sampling_protocol_v1
+dataset_version: football_cover_formal_v1
+schema_version: research_schema_v1
+status: design_only
+
+targets:
+  target_final_samples: 5000
+  final_target_rule: ">= target_final_samples after dedup, relevance filtering, manual review, image QC, and metadata QC"
+  candidate_target_min: 6500
+  candidate_target_preferred: 7000
+
+time_window:
+  collection_window_months: 12
+  cutoff_rule: "collection_time - 12 calendar months"
+  required_fields:
+    - publish_time
+    - collection_time
+    - video_age_days
+
+collection:
+  mode: multi_day
+  batch_id_format: "day_{sequence:02d}"
+  daily_search_budget: null
+  daily_candidate_target: null
+  estimated_days_required: null
+  stop_before_quota_exhaustion: true
+  quota_bypass_prohibited: true
+  batch_report_required: true
+
+query_taxonomy:
+  core_football_content:
+    - match
+    - highlights
+    - goals
+    - skills
+    - tactics
+    - transfer
+    - predictions
+    - football news
+    - club news
+    - player analysis
+    - tournament news
+  competition:
+    - Premier League
+    - Champions League
+    - La Liga
+    - FIFA World Cup
+    - Europa League
+    - international football
+  club:
+    - Arsenal
+    - Barcelona
+    - Real Madrid
+    - Manchester City
+    - Manchester United
+    - Liverpool
+    - Bayern Munich
+    - PSG
+  player:
+    - Messi
+    - Ronaldo
+    - Mbappe
+    - Haaland
+    - Yamal
+  multilingual:
+    required_languages:
+      - English
+      - Spanish
+    spanish_terms:
+      - fútbol
+      - futbol
+    incidental_languages: record_without_forced_expansion
+  entertainment_derivative:
+    - World Cup ceremony
+    - football music
+    - halftime show
+    - influencer football
+    - charity match
+    - football entertainment
+  interpretation_rule: "Queries discover candidates; query yield is not a platform prevalence estimate or research weight."
+
+author_controls:
+  required_fields:
+    - channel_id
+    - author_followers
+    - channel_sample_count
+  provisional_tiers:
+    - head
+    - mid
+    - long_tail
+  tier_method: null
+  tier_method_candidates:
+    - quantile_based
+    - log_follower_distribution
+  max_samples_per_channel: null
+  calibration_stage: stress_test_500
+
+deduplication:
+  primary_key: video_id
+  stages:
+    - within_query
+    - across_queries
+    - within_day
+    - across_days
+    - historical_registry
+  historical_registry_name: historical_video_id_registry
+  historical_registry_path: data/formal/manifests/historical_video_id_registry.csv
+  historical_sources:
+    - filter_development
+    - blind_tests
+    - error_analysis
+  default_development_overlap: false
+  overlap_exception_requires_explicit_flag: true
+
+filter_interface:
+  filter_bundle_sha: null
+  decision_values:
+    - accept
+    - reject
+    - abstain
+  annotation_guideline: reports/football_annotation_guideline_v1.md
+  manual_decision_values:
+    - manual_accept
+    - manual_reject
+  eligibility_rule: "filter_status == accept OR (filter_status == abstain AND manual_review_status == manual_accept)"
+
+thumbnail_qc:
+  thumbnail_min_width: null
+  thumbnail_min_height: null
+  valid_content_types:
+    - image/jpeg
+    - image/png
+    - image/webp
+  required_checks:
+    - thumbnail_url_present
+    - image_path_present
+    - content_type_valid
+    - image_decodable
+    - dimensions_above_configured_minimum
+    - image_not_blank_or_corrupt
+  status_fields:
+    - thumbnail_download_status
+    - thumbnail_decode_status
+    - thumbnail_qc_status
+  calibration_stage: stress_test_500
+
+metadata_qc:
+  tier_1_required:
+    - video_id
+    - publish_time
+    - channel_id
+    - thumbnail_or_image
+    - views
+  tier_2_strongly_preferred:
+    - likes
+    - comments
+    - author_followers
+  tier_3_optional:
+    - description
+    - shares
+    - saves
+  missing_policy:
+    tier_1: normally_exclude
+    tier_2: retain_and_flag_missingness
+    tier_3: retain
+    unavailable_shares_saves: NaN
+
+quality_gates:
+  hard:
+    - video_id_unique
+    - image_usable
+    - publish_time_valid_and_in_window
+    - views_present
+    - historical_overlap_policy_satisfied
+  warning:
+    - channel_concentration
+    - query_group_imbalance
+    - publish_month_imbalance
+    - content_subtype_imbalance
+  monitored_metrics:
+    - unique_video_rate
+    - thumbnail_success_rate
+    - tier1_completeness
+    - author_followers_availability
+    - likes_availability
+    - comments_availability
+    - duplicate_rate
+    - filter_accept_rate
+    - abstain_rate
+    - manual_review_volume
+    - single_channel_concentration
+    - top10_channel_share
+    - channel_hhi
+    - publish_month_distribution
+    - query_group_distribution
+    - content_subtype_distribution
+  thresholds: null
+  threshold_calibration_stage: stress_test_500
+
+recovery:
+  checkpoint_enabled: true
+  resume_enabled: true
+  failed_queue_enabled: true
+  retry_limit: null
+  never_overwrite_completed_results: true
+  checkpoint_sets:
+    - completed_video_ids
+    - failed_video_ids
+    - pending_video_ids
+  recoverable_failures:
+    - http_429
+    - timeout
+    - network_error
+    - image_failure
+
+paths:
+  raw: data/formal/raw
+  images: data/formal/images
+  processed: data/formal/processed
+  manifests: data/formal/manifests
+  batch_candidates: "data/formal/raw/{batch_id}_candidates.csv"
+  batch_filtered: "data/formal/processed/{batch_id}_filtered.csv"
+  batch_manifest: "data/formal/manifests/{batch_id}_manifest.json"
+  batch_qc_report: "reports/formal/{batch_id}_qc_report.md"
+  final_dataset: data/formal/processed/formal_research_dataset_v1.csv
+
+lineage:
+  sampling_protocol_version: formal_sampling_protocol_v1
+  filter_bundle_sha: null
+  visual_feature_version: null
+  metrics_version: null
+  schema_version: research_schema_v1
+
+stress_test_500:
+  role: pipeline_validation_only
+  counts_as_final_research_sample: false
+  must_pass_before_formal_collection: true
+  validates:
+    - api_quota_usage
+    - search_efficiency
+    - dedup_efficiency
+    - filter_throughput
+    - vlm_throughput
+    - abstain_manual_volume
+    - thumbnail_download_stability
+    - batch_resume
+    - schema_merge
+    - qc_gates

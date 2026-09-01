@@ -1,0 +1,5 @@
+# Optional packages for modeling utilities; not needed by the offline demo.
+-r requirements.txt
+joblib>=1.4,<2
+scikit-learn>=1.5,<2
+statsmodels>=0.14,<1
