@@ -1,0 +1,67 @@
+version: 1
+status: schema_definition_only
+intended_sample_size: ">=5000 formal valid football thumbnails"
+modules:
+  identity:
+    - video_id
+    - post_id
+    - source_platform
+    - collection_batch
+    - collection_time
+  content:
+    - title
+    - description_snippet
+    - publish_time
+    - content_subtype
+    - query_keyword
+    - relevance_decision
+  author_channel_controls:
+    - channel_id
+    - channel_title
+    - author_followers
+  propagation_outcomes:
+    - views
+    - likes
+    - comments
+    - shares
+    - saves
+  thumbnail:
+    - thumbnail_url
+    - image_path
+    - image_width
+    - image_height
+  visual_feature_v1:
+    source_header: data/processed/thumbnail_visual_features_v1.csv
+    discovery: automatic
+    expected_feature_count: 21
+    excluded_non_feature_columns:
+      - video_id
+      - image_path
+      - feature_extraction_status
+      - feature_extraction_error
+  visual_extraction_diagnostics:
+    - feature_extraction_status
+    - feature_extraction_error
+  research_derived:
+    - video_age_days
+    - log_views
+    - log_likes
+    - log_comments
+    - like_rate
+    - comment_rate
+    - engagement_rate
+    - views_per_day
+    - log_author_followers
+formulas:
+  video_age_days: (collection_time - publish_time) in days; negative values invalid
+  log_views: log1p(views)
+  log_likes: log1p(likes)
+  log_comments: log1p(comments)
+  like_rate: likes / views; NaN when views <= 0
+  comment_rate: comments / views; NaN when views <= 0
+  engagement_rate: (likes + comments) / views; NaN when views <= 0
+  views_per_day: views / max(video_age_days, 1)
+  log_author_followers: log1p(author_followers); missing stays NaN
+missing_value_policy:
+  youtube_shares: NaN
+  youtube_saves: NaN

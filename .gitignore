@@ -1,0 +1,62 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.p12
+*.pem
+*.key
+*api_key*
+*credentials*
+*token*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Local logs and caches
+logs/
+cache/
+uploads/
+outputs/
+.cache/
+.tmp/
+tmp/
+
+# Large/raw research artifacts
+raw/
+data/
+!examples/
+data/raw/
+data/interim/
+data/private/
+thumbnails/
+thumbnail_cache/
+artifacts/raw/
+/models/
+checkpoints/
+reports/
+deliverables/
+work/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Local exports
+*.parquet
+*.feather
+*.pkl
+*.pickle
+*.joblib
+
+# Keep only intentionally curated public samples under examples/ or data/sample/

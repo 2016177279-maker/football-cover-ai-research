@@ -1,0 +1,13 @@
+video_id,channel_id,topic,published_at,views,likes,comments,subscriber_count
+demo_video_001,demo_channel_001,match_analysis,2026-01-05T12:00:00Z,12400,730,82,45000
+demo_video_002,demo_channel_002,player_profile,2026-01-12T15:30:00Z,8600,510,61,28000
+demo_video_003,demo_channel_003,tactical_explainer,2026-02-03T09:00:00Z,23100,1420,177,92000
+demo_video_004,demo_channel_001,match_preview,2026-02-17T18:00:00Z,9700,480,45,45000
+demo_video_005,demo_channel_004,football_history,2026-03-02T10:15:00Z,31500,1980,240,130000
+demo_video_006,demo_channel_005,training_tips,2026-03-19T07:45:00Z,6800,390,38,21000
+demo_video_007,demo_channel_002,transfer_explainer,2026-04-08T13:20:00Z,17400,960,121,28000
+demo_video_008,demo_channel_003,goalkeeping_analysis,2026-04-24T16:10:00Z,15200,870,94,92000
+demo_video_009,demo_channel_004,team_profile,2026-05-11T11:40:00Z,26700,1510,166,130000
+demo_video_010,demo_channel_005,youth_development,2026-05-28T08:25:00Z,5900,350,29,21000
+demo_video_011,demo_channel_006,womens_football,2026-06-09T14:00:00Z,11800,790,88,37000
+demo_video_012,demo_channel_006,set_piece_analysis,2026-06-23T17:35:00Z,13900,820,103,37000

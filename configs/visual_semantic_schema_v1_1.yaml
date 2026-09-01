@@ -1,0 +1,47 @@
+version: visual-semantic-v1.1
+direction: image_only
+baseline_sha256:
+  schema_v1: 10ba471cf1d0a32b83b04169160d76fe2091be9cd42459b09da24e2b0f9aa690
+  csv_v1: 0ce130c7e765b7ddc00df3c6278ba0079d964bcee26910574b17acc5237e6f2e
+  feasibility_v1: 2327d724fd8265cd60f4d92d3b5525a860457770214601efb2edb98669be6ee6
+feature_tiers:
+  core_keep: [person_present, person_count_estimate, closeup_face_present, single_main_person, person_area_category, football_ball_present, football_pitch_present, stadium_present, football_kit_present, trophy_present, club_logo_present, scene_type, subject_centered, subject_left, subject_right, collage_layout, split_screen, strong_foreground_subject, text_present, text_amount_category, large_title_text_present, text_position, high_contrast_style, saturated_style, dark_background, news_graphic_style, realistic_photo, rivalry_or_vs_layout, celebration_cue, action_cue, transfer_rumor_cue, breaking_news_cue]
+  optional_keep: [multiple_people, emotional_expression_present, goalpost_present, scoreboard_present, multiple_visual_panels, background_complexity_category, numeric_text_present, score_like_text_present, uppercase_dominant, cinematic_style]
+  drop_or_defer: [face_closeup, dramatic_lighting, bright_background, meme_style, AI_generated_or_heavily_composited_suspected, trophy_cue, ranking_list_cue, emotional_reaction_cue]
+tier_rationale:
+  optional_keep: "Potentially useful but redundant with a core field, unstable in v1, or dependent on small/legible details. Retain for later model evaluation, not v1.1 core output."
+  drop_or_defer: "High overlap, subjective provenance/style inference, or narrative duplication; defer rather than claiming the concept has no research value."
+confidence_fields: [overall_visual_confidence, text_layout_confidence, scene_confidence]
+fields:
+  - {name: person_present, type: boolean, allowed_values: [false, true], definition: "At least one visible human.", example: true, confidence_required: overall_visual_confidence, notes: "No identity recognition."}
+  - {name: person_count_estimate, type: integer, allowed_values: "0..10", definition: "Approximate visible people, capped at 10.", example: 2, confidence_required: overall_visual_confidence, notes: "10 means 10+."}
+  - {name: closeup_face_present, type: boolean, allowed_values: [false, true], definition: "At least one prominent close-up face.", example: true, confidence_required: overall_visual_confidence, notes: "No identity recognition."}
+  - {name: single_main_person, type: boolean, allowed_values: [false, true], definition: "One person is clearly primary.", example: true, confidence_required: overall_visual_confidence, notes: "Background people may exist."}
+  - {name: person_area_category, type: string, allowed_values: [none, small, medium, large], definition: "Coarse combined person area.", example: large, confidence_required: overall_visual_confidence, notes: "No segmentation."}
+  - {name: football_ball_present, type: boolean, allowed_values: [false, true], definition: "A soccer ball is visible.", example: true, confidence_required: overall_visual_confidence, notes: "Visual evidence only."}
+  - {name: football_pitch_present, type: boolean, allowed_values: [false, true], definition: "Pitch or pitch markings visible.", example: true, confidence_required: scene_confidence, notes: "Diagrams qualify."}
+  - {name: stadium_present, type: boolean, allowed_values: [false, true], definition: "Stadium structure or stands visible.", example: true, confidence_required: scene_confidence, notes: "Crowd alone insufficient."}
+  - {name: football_kit_present, type: boolean, allowed_values: [false, true], definition: "Recognizable soccer kit visible.", example: true, confidence_required: overall_visual_confidence, notes: "Require soccer context."}
+  - {name: trophy_present, type: boolean, allowed_values: [false, true], definition: "A trophy or cup is visible.", example: false, confidence_required: overall_visual_confidence, notes: "Object presence."}
+  - {name: club_logo_present, type: boolean, allowed_values: [false, true], definition: "A football club crest is visible.", example: true, confidence_required: overall_visual_confidence, notes: "No club identification."}
+  - {name: scene_type, type: string, allowed_values: [match_action, player_portrait, press_conference, celebration, tactical_analysis, transfer_news, studio/news, ceremony/performance, training, other], definition: "Dominant visible scene archetype.", example: match_action, confidence_required: scene_confidence, notes: "Image-only."}
+  - {name: subject_centered, type: boolean, allowed_values: [false, true], definition: "Primary subject occupies center.", example: true, confidence_required: overall_visual_confidence, notes: "Coarse layout."}
+  - {name: subject_left, type: boolean, allowed_values: [false, true], definition: "Primary subject predominantly left.", example: false, confidence_required: overall_visual_confidence, notes: "Can coexist with right."}
+  - {name: subject_right, type: boolean, allowed_values: [false, true], definition: "Primary subject predominantly right.", example: false, confidence_required: overall_visual_confidence, notes: "Can coexist with left."}
+  - {name: collage_layout, type: boolean, allowed_values: [false, true], definition: "Multiple cut-outs or visual sources are composited.", example: true, confidence_required: overall_visual_confidence, notes: "Not any multi-person photo."}
+  - {name: split_screen, type: boolean, allowed_values: [false, true], definition: "Canvas visibly divided into two regions.", example: false, confidence_required: overall_visual_confidence, notes: "Versus layout may qualify."}
+  - {name: strong_foreground_subject, type: boolean, allowed_values: [false, true], definition: "Large separated foreground subject dominates.", example: true, confidence_required: overall_visual_confidence, notes: "Human or object."}
+  - {name: text_present, type: boolean, allowed_values: [false, true], definition: "Meaningful visible text.", example: true, confidence_required: text_layout_confidence, notes: "No transcription."}
+  - {name: text_amount_category, type: string, allowed_values: [none, low, medium, high], definition: "Coarse amount of visible text.", example: medium, confidence_required: text_layout_confidence, notes: "Kept despite instability; recognition problem, useful construct."}
+  - {name: large_title_text_present, type: boolean, allowed_values: [false, true], definition: "Large headline block visible.", example: true, confidence_required: text_layout_confidence, notes: "Relative to canvas."}
+  - {name: text_position, type: string, allowed_values: [none, top, center, bottom, mixed], definition: "Dominant vertical text placement.", example: bottom, confidence_required: text_layout_confidence, notes: "Mixed for multiple zones."}
+  - {name: high_contrast_style, type: boolean, allowed_values: [false, true], definition: "Intentionally strong tonal/color contrast.", example: true, confidence_required: overall_visual_confidence, notes: "Semantic complement to v1 pixels."}
+  - {name: saturated_style, type: boolean, allowed_values: [false, true], definition: "Intentionally vivid colors.", example: true, confidence_required: overall_visual_confidence, notes: "Kept despite instability; model issue."}
+  - {name: dark_background, type: boolean, allowed_values: [false, true], definition: "Dominant background is dark.", example: false, confidence_required: overall_visual_confidence, notes: "Foreground may be bright."}
+  - {name: news_graphic_style, type: boolean, allowed_values: [false, true], definition: "Visible news-card/broadcast graphic style.", example: true, confidence_required: overall_visual_confidence, notes: "Style, not topic."}
+  - {name: realistic_photo, type: boolean, allowed_values: [false, true], definition: "Natural photography is dominant basis.", example: true, confidence_required: overall_visual_confidence, notes: "May coexist with compositing."}
+  - {name: rivalry_or_vs_layout, type: boolean, allowed_values: [false, true], definition: "Opposing subjects/logos arranged as versus.", example: true, confidence_required: scene_confidence, notes: "Visible cue."}
+  - {name: celebration_cue, type: boolean, allowed_values: [false, true], definition: "Visible celebration/victory cue.", example: true, confidence_required: scene_confidence, notes: "Pose/context."}
+  - {name: action_cue, type: boolean, allowed_values: [false, true], definition: "Dynamic play or motion emphasized.", example: true, confidence_required: scene_confidence, notes: "Visual cue."}
+  - {name: transfer_rumor_cue, type: boolean, allowed_values: [false, true], definition: "Layout signals transfer speculation.", example: false, confidence_required: scene_confidence, notes: "Requires visible arrows/pairing/rumor graphics."}
+  - {name: breaking_news_cue, type: boolean, allowed_values: [false, true], definition: "Urgent/breaking visual treatment.", example: true, confidence_required: text_layout_confidence, notes: "Visible banner/alert treatment."}

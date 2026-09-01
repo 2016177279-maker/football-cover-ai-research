@@ -1,0 +1,13 @@
+video_id,text_coverage,aesthetic_coherence,visual_entropy,center_saliency,face_presence,subject_prominence
+demo_video_001,0.18,6.2,5.4,0.61,1,0.52
+demo_video_002,0.31,5.7,6.1,0.48,1,0.44
+demo_video_003,0.12,6.8,5.0,0.69,0,0.58
+demo_video_004,0.27,5.4,6.4,0.43,2,0.39
+demo_video_005,0.09,7.1,4.8,0.72,1,0.63
+demo_video_006,0.36,5.1,6.7,0.38,1,0.41
+demo_video_007,0.22,6.0,5.9,0.55,2,0.47
+demo_video_008,0.14,6.5,5.2,0.66,1,0.60
+demo_video_009,0.25,5.9,6.0,0.51,3,0.49
+demo_video_010,0.33,5.3,6.5,0.42,0,0.36
+demo_video_011,0.16,6.7,5.1,0.68,1,0.57
+demo_video_012,0.20,6.3,5.6,0.59,0,0.54
