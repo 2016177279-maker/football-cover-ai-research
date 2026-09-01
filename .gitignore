@@ -42,7 +42,7 @@ data/private/
 thumbnails/
 thumbnail_cache/
 artifacts/raw/
-models/
+/models/
 checkpoints/
 reports/
 deliverables/
