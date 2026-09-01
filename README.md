@@ -152,7 +152,7 @@ The Streamlit PoC supports:
 - candidate ranking and abstention;
 - up to two human decision rounds.
 
-A completed stability check reported **24/24 tests passed**. The demo is designed to run offline by default and does not require YouTube API or image-generation credentials for its core review flow.
+The public portfolio includes an offline-safe test and demo layer so reviewers can inspect the workflow without YouTube API credentials, production data, model checkpoints or image-generation keys.
 
 ---
 
